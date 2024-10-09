@@ -35,6 +35,7 @@ export default (props) => {
     blink: true,
     cursorHold: false,
     keystroke: null,
+    hideKeystroke: false,
   });
 
   const [isPlaying, setIsPlaying] = createSignal(false);
@@ -55,6 +56,7 @@ export default (props) => {
   const terminalRows = createMemo(() => terminalSize().rows || 24);
   const controlBarHeight = () => (props.controls === false ? 0 : CONTROL_BAR_HEIGHT);
   const [keystroke, setKeystroke] = createSignal("");
+  const [isKeystrokeVisible, setisKeystrokeVisible] = createSignal(false);
 
   const controlsVisible = () =>
     props.controls === true || (props.controls === "auto" && userActive());
@@ -107,6 +109,7 @@ export default (props) => {
       setOriginalTheme(theme);
       setMarkers(markers);
       setPoster(poster);
+      setisKeystrokeVisible(false);
     });
   });
 
@@ -134,6 +137,7 @@ export default (props) => {
       setIsPlaying(false);
       onStopped();
       setOverlay("loader");
+      setisKeystrokeVisible(false);
     });
   });
 
@@ -153,6 +157,7 @@ export default (props) => {
     batch(() => {
       setIsPlaying(false);
       onStopped();
+      setisKeystrokeVisible(false);
 
       if (message !== undefined) {
         setInfoMessage(message);
@@ -166,7 +171,17 @@ export default (props) => {
   });
 
   core.addEventListener("input", ({data}) => {
-    setState("keystroke", printablekeypress(data));
+    if (state.hideKeystroke) {
+      return;
+    }
+    var pressed_key = printablekeypress(data);
+    if (pressed_key == "") {
+      setisKeystrokeVisible(false);
+    }
+    else {
+      setisKeystrokeVisible(true);
+      setState("keystroke", printablekeypress(data));
+    }
   })
 
   core.addEventListener("resize", resize);
@@ -329,6 +344,13 @@ export default (props) => {
       } else {
         core.pause();
         setIsHelpVisible(true);
+      }
+    } else if (e.key == "k") {
+      if (state.hideKeystroke) {
+        setState("hideKeystroke", false);
+      } else {
+        setisKeystrokeVisible(false);
+        setState("hideKeystroke", true);
       }
     } else if (e.key == "ArrowLeft") {
       if (e.shiftKey) {
@@ -507,8 +529,11 @@ export default (props) => {
             ref={controlBarRef}
           />
         </Show>
-        <Show when={state.keystroke != ""}>
-          <KeystrokesOverlay keystroke={state.keystroke} />
+        <Show when={isKeystrokeVisible()}>
+          <KeystrokesOverlay
+            fontFamily={props.terminalFontFamily}
+            keystroke={state.keystroke}
+          />
         </Show>
         <Switch>
           <Match when={overlay() == "start"}>
