@@ -35,7 +35,7 @@ export default (props) => {
     blink: true,
     cursorHold: false,
     keystroke: null,
-    hideKeystroke: false,
+    hideKeystroke: props.hideKeystroke,
   });
 
   const [isPlaying, setIsPlaying] = createSignal(false);
@@ -102,19 +102,20 @@ export default (props) => {
     }
   }
 
-  core.addEventListener("init", ({ cols, rows, duration, theme, poster, markers }) => {
+  core.addEventListener("init", ({ cols, rows, duration, theme, poster, markers, hideKeystroke }) => {
     batch(() => {
       resize({ cols, rows });
       setDuration(duration);
       setOriginalTheme(theme);
       setMarkers(markers);
       setPoster(poster);
-      setisKeystrokeVisible(false);
+      setisKeystrokeVisible(!hideKeystroke);
     });
   });
 
   core.addEventListener("play", () => {
     setOverlay(null);
+    setisKeystrokeVisible(false);
   });
 
   core.addEventListener("playing", () => {
@@ -128,6 +129,7 @@ export default (props) => {
   core.addEventListener("idle", () => {
     batch(() => {
       setIsPlaying(false);
+      setisKeystrokeVisible(false);
       onStopped();
     });
   });
