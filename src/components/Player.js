@@ -180,7 +180,7 @@ export default (props) => {
     setisKeyStrokeFading(false);
     setTimeout(function () {
       setisKeyStrokeFading(true);
-    }, 20);
+    }, 10);
 
     var pressed_key = printablekeypress(data, logger);
     if (pressed_key === "") {
