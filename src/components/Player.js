@@ -326,7 +326,6 @@ export default (props) => {
 
     if (e.key == " ") {
       core.togglePlay();
-      setisKeyStrokeFading(false);
     } else if (e.key == ".") {
       core.step();
       updateTime();
@@ -534,7 +533,6 @@ export default (props) => {
           <KeystrokesOverlay
             fontFamily={props.terminalFontFamily}
             keystroke={keyStroke()}
-            isKeystrokeFading={isKeystrokeFading()}
             hideKeyStroke={hideKeyStroke}
             logger={props.logger}
           />
