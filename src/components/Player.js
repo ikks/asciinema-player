@@ -101,16 +101,19 @@ export default (props) => {
     }
   }
 
-  core.addEventListener("init", ({ cols, rows, duration, theme, poster, markers, hideKeystroke }) => {
-    batch(() => {
-      resize({ cols, rows });
-      setDuration(duration);
-      setOriginalTheme(theme);
-      setMarkers(markers);
-      setPoster(poster);
-      setisKeystrokeVisible(!hideKeystroke);
-    });
-  });
+  core.addEventListener(
+    "init",
+    ({ cols, rows, duration, theme, poster, markers, hideKeystroke }) => {
+      batch(() => {
+        resize({ cols, rows });
+        setDuration(duration);
+        setOriginalTheme(theme);
+        setMarkers(markers);
+        setPoster(poster);
+        setisKeystrokeVisible(!hideKeystroke);
+      });
+    },
+  );
 
   core.addEventListener("play", () => {
     setOverlay(null);
@@ -171,19 +174,18 @@ export default (props) => {
     setOverlay("error");
   });
 
-  core.addEventListener("input", ({data}) => {
+  core.addEventListener("input", ({ data }) => {
     if (state.hideKeystroke) {
       return;
     }
-    var pressed_key = printablekeypress(data);
+    var pressed_key = printablekeypress(data, logger);
     if (pressed_key === "") {
       setisKeystrokeVisible(false);
-    }
-    else {
+    } else {
       setisKeystrokeVisible(true);
-      setState("keystroke", printablekeypress(data));
+      setState("keystroke", pressed_key);
     }
-  })
+  });
 
   core.addEventListener("resize", resize);
 
@@ -531,10 +533,7 @@ export default (props) => {
           />
         </Show>
         <Show when={isKeystrokeVisible()}>
-          <KeystrokesOverlay
-            fontFamily={props.terminalFontFamily}
-            keystroke={state.keystroke}
-          />
+          <KeystrokesOverlay fontFamily={props.terminalFontFamily} keystroke={state.keystroke} />
         </Show>
         <Switch>
           <Match when={overlay() == "start"}>
