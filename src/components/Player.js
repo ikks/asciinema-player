@@ -56,7 +56,7 @@ export default (props) => {
   const terminalRows = createMemo(() => terminalSize().rows || 24);
   const controlBarHeight = () => (props.controls === false ? 0 : CONTROL_BAR_HEIGHT);
   const [isKeystrokeVisible, setisKeystrokeVisible] = createSignal(false);
-
+  const [isKeystrokeFading, setisKeyStrokeFading] = createSignal(false);
   const controlsVisible = () =>
     props.controls === true || (props.controls === "auto" && userActive());
 
@@ -131,7 +131,6 @@ export default (props) => {
   core.addEventListener("idle", () => {
     batch(() => {
       setIsPlaying(false);
-      setisKeystrokeVisible(false);
       onStopped();
     });
   });
@@ -178,6 +177,11 @@ export default (props) => {
     if (state.hideKeystroke) {
       return;
     }
+    setisKeyStrokeFading(false);
+    setTimeout(function () {
+      setisKeyStrokeFading(true);
+    }, 20);
+
     var pressed_key = printablekeypress(data, logger);
     if (pressed_key === "") {
       setisKeystrokeVisible(false);
@@ -199,6 +203,7 @@ export default (props) => {
 
   core.addEventListener("seeked", () => {
     updateTime();
+    setisKeystrokeVisible(false);
   });
 
   core.addEventListener("terminalUpdate", () => {
@@ -329,6 +334,7 @@ export default (props) => {
 
     if (e.key == " ") {
       core.togglePlay();
+      setisKeyStrokeFading(false);
     } else if (e.key == ".") {
       core.step();
       updateTime();
@@ -533,7 +539,11 @@ export default (props) => {
           />
         </Show>
         <Show when={isKeystrokeVisible()}>
-          <KeystrokesOverlay fontFamily={props.terminalFontFamily} keystroke={state.keystroke} />
+          <KeystrokesOverlay
+            fontFamily={props.terminalFontFamily}
+            keystroke={state.keystroke}
+            isKeystrokeFading={isKeystrokeFading()}
+          />
         </Show>
         <Switch>
           <Match when={overlay() == "start"}>
